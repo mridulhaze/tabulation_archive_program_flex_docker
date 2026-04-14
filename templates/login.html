@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — NU Archive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    height: 100%;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+}
+
+body {
+    background: #f7f7f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    position: relative;
+}
+
+#bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ══════════════════════════════════
+   SCENE — two column layout
+══════════════════════════════════ */
+.scene {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 860px;
+    display: flex;
+    align-items: center;
+    padding: 2rem 1.5rem;
+    gap: 4rem;
+}
+
+/* ── LEFT brand panel ── */
+.brand-side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    animation: fadeLeft 0.8s cubic-bezier(.16,1,.3,1) 0.15s both;
+}
+@keyframes fadeLeft {
+    from { opacity: 0; transform: translateX(-28px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── LOGO ROW ── */
+.brand-logo-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.nu-logo-wrap {
+    position: relative;
+    width: 72px; height: 72px;
+    flex-shrink: 0;
+}
+
+/* Outer pulsing ring */
+.nu-logo-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid rgba(193,49,10,0.35);
+    animation: logoRing 2.2s ease-in-out infinite;
+}
+
+/* Second ring */
+.nu-logo-wrap::after {
+    content: '';
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    border: 1px solid rgba(193,49,10,0.15);
+    animation: logoRing 2.2s ease-in-out infinite 0.4s;
+}
+
+@keyframes logoRing {
+    0%   { transform: scale(0.92); opacity: 0; }
+    40%  { opacity: 1; }
+    100% { transform: scale(1.18); opacity: 0; }
+}
+
+.nu-logo-img {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    object-fit: contain;
+    display: block;
+    position: relative; z-index: 2;
+    animation: logoFlash 3s ease-in-out infinite;
+    filter: drop-shadow(0 4px 16px rgba(193,49,10,0.35));
+    background: #fff;
+    padding: 4px;
+    box-shadow: 0 2px 16px rgba(193,49,10,0.2), 0 0 0 2px rgba(193,49,10,0.12);
+}
+
+@keyframes logoFlash {
+    0%   { filter: drop-shadow(0 4px 12px rgba(193,49,10,0.3))  brightness(1); }
+    45%  { filter: drop-shadow(0 6px 28px rgba(193,49,10,0.75)) brightness(1.12); }
+    55%  { filter: drop-shadow(0 6px 32px rgba(224,120,40,0.8)) brightness(1.18); }
+    100% { filter: drop-shadow(0 4px 12px rgba(193,49,10,0.3))  brightness(1); }
+}
+
+.brand-logo-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.brand-logo-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.05rem; font-weight: 800;
+    color: #000;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+}
+
+.brand-logo-title .lo { color: #c1310a; }
+
+.brand-logo-sub {
+    font-size: 0.62rem; font-weight: 600;
+    letter-spacing: 0.09em; text-transform: uppercase;
+    color: #444;
+    margin-top: 1px;
+}
+
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #c1310a;
+}
+.eyebrow::before {
+    content: '';
+    width: 20px; height: 2px;
+    background: #c1310a;
+    border-radius: 2px;
+}
+
+.brand-h {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(2.2rem, 3.8vw, 3.2rem);
+    font-weight: 800;
+    color: #000;
+    letter-spacing: -0.03em;
+    line-height: 1.04;
+}
+.brand-h .r  { color: #c1310a; }
+.brand-h .sm {
+    display: block;
+    font-weight: 600;
+    font-size: 0.55em;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #222;
+    margin-top: 0.3em;
+}
+
+.brand-p {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
+    line-height: 1.8;
+    max-width: 290px;
+}
+
+.stats {
+    display: flex;
+    gap: 1.8rem;
+    padding-top: 0.25rem;
+}
+
+.s-num {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #000;
+    letter-spacing: -0.04em;
+    line-height: 1;
+}
+.s-num em { color: #c1310a; font-style: normal; }
+.s-lbl {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #444;
+    margin-top: 3px;
+}
+
+/* ── RIGHT: login card ── */
+.card-wrap {
+    flex-shrink: 0;
+    width: 330px;
+    animation: cardUp 0.8s cubic-bezier(.16,1,.3,1) 0.25s both;
+}
+@keyframes cardUp {
+    from { opacity: 0; transform: translateY(22px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.card {
+    background: #fff;
+    border-radius: 26px;
+    overflow: hidden;
+    box-shadow:
+        0 1px 0 rgba(0,0,0,0.04),
+        0 6px 24px rgba(0,0,0,0.08),
+        0 28px 60px rgba(0,0,0,0.08);
+}
+
+/* Header — orange → blue gradient */
+.c-head {
+    background: linear-gradient(140deg, #e03d06 0%, #f07228 42%, #1480d8 100%);
+    padding: 1.45rem 1.65rem 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative circles */
+.c-head::before {
+    content: '';
+    position: absolute;
+    right: -40px; top: -40px;
+    width: 150px; height: 150px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+}
+.c-head::after {
+    content: '';
+    position: absolute;
+    right: 30px; bottom: -55px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+}
+
+.c-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    position: relative;
+    z-index: 2;
+    margin-bottom: 1.05rem;
+}
+
+.c-logo-icon {
+    width: 34px; height: 34px;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    backdrop-filter: blur(8px);
+}
+
+.c-logo-name {
+    font-family: 'Sora', sans-serif;
+    font-size: 0.85rem; font-weight: 700;
+    color: #fff; line-height: 1.15;
+}
+.c-logo-sub {
+    font-size: 0.6rem; color: rgba(255,255,255,0.85);
+    margin-top: 1px;
+}
+
+.c-title {
+    position: relative; z-index: 2;
+    font-family: 'Sora', sans-serif;
+    font-size: 1.3rem; font-weight: 800;
+    color: #fff; letter-spacing: -0.02em;
+    line-height: 1.1;
+}
+.c-subtitle {
+    position: relative; z-index: 2;
+    font-size: 0.73rem;
+    color: rgba(255,255,255,0.88);
+    font-weight: 500;
+    margin-top: 3px;
+}
+
+/* Card body */
+.c-body {
+    padding: 1.4rem 1.65rem 1.5rem;
+}
+
+/* Alert */
+.nu-alert {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: rgba(193,49,10,0.07);
+    border: 1px solid rgba(193,49,10,0.18);
+    border-radius: 9px; padding: 0.58rem 0.8rem;
+    margin-bottom: 1rem;
+    font-size: 0.79rem; color: #c1310a;
+}
+
+/* Field */
+.field { margin-bottom: 0.82rem; }
+
+.f-label {
+    display: block; margin-bottom: 0.33rem;
+    font-size: 0.65rem; font-weight: 800;
+    letter-spacing: 0.09em; text-transform: uppercase;
+    color: #111;
+}
+
+.f-wrap { position: relative; display: flex; align-items: center; }
+
+.f-icon {
+    position: absolute; left: 11px; z-index: 2;
+    font-size: 0.82rem; color: #666;
+    pointer-events: none; transition: color 0.2s;
+}
+
+.f-input {
+    width: 100%;
+    background: #f5f5f2;
+    border: 1.5px solid #d8d8d4;
+    border-radius: 11px;
+    padding: 0.7rem 0.85rem 0.7rem 2.25rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.86rem; font-weight: 500;
+    color: #000; outline: none;
+    transition: all 0.2s;
+}
+.f-input::placeholder { color: #999; }
+.f-input:focus {
+    border-color: #e03d06;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(224,61,6,0.12);
+}
+.f-wrap:has(.f-input:focus) .f-icon { color: #e03d06; }
+
+.toggle-btn {
+    position: absolute; right: 10px; z-index: 2;
+    background: none; border: none; cursor: pointer;
+    font-size: 0.8rem; color: #888; padding: 0; transition: color 0.2s;
+}
+.toggle-btn:hover { color: #333; }
+
+/* Forgot */
+.forgot-row {
+    display: flex; justify-content: flex-end;
+    margin: -0.2rem 0 1.05rem;
+}
+.forgot-link {
+    font-size: 0.73rem; color: #1480d8;
+    text-decoration: none; transition: color 0.2s;
+}
+.forgot-link:hover { color: #0a5fa0; }
+
+.forgot-msg {
+    display: none; align-items: flex-start; gap: 0.5rem;
+    background: rgba(20,128,216,0.06);
+    border: 1px solid rgba(20,128,216,0.16);
+    border-radius: 9px; padding: 0.58rem 0.8rem;
+    margin-bottom: 0.9rem;
+}
+.forgot-msg.show { display: flex; }
+.forgot-msg i { font-size: 0.85rem; color: #1480d8; flex-shrink: 0; margin-top: 2px; }
+.forgot-msg span { font-size: 0.76rem; color: #111; font-weight: 500; line-height: 1.55; }
+.forgot-msg strong { color: #1480d8; font-weight: 700; }
+
+/* Submit */
+.btn-go {
+    width: 100%; padding: 0.8rem;
+    background: linear-gradient(135deg, #e03d06, #f07228 50%, #1480d8);
+    border: none; border-radius: 11px;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.86rem; font-weight: 700;
+    color: #fff; letter-spacing: 0.02em;
+    cursor: pointer; transition: all 0.22s;
+    box-shadow: 0 4px 16px rgba(224,61,6,0.35), 0 2px 8px rgba(20,128,216,0.15);
+    position: relative; overflow: hidden;
+}
+.btn-go::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0.12);
+    opacity: 0; transition: opacity 0.22s;
+}
+.btn-go:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(224,61,6,0.42), 0 4px 14px rgba(20,128,216,0.2); }
+.btn-go:hover::after { opacity: 1; }
+.btn-go:active { transform: translateY(0); }
+
+/* Sep */
+.sep {
+    display: flex; align-items: center; gap: 0.7rem;
+    margin: 0.95rem 0 0.8rem;
+    font-size: 0.62rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: #555;
+}
+.sep::before, .sep::after { content: ''; flex: 1; height: 1px; background: #ddd; }
+
+/* Social */
+.social { display: flex; gap: 0.45rem; }
+.soc-btn {
+    flex: 1; padding: 0.52rem;
+    background: #f0f0ec;
+    border: 1.5px solid #d8d8d4;
+    border-radius: 9px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; color: #444; transition: all 0.2s;
+}
+.soc-btn:hover {
+    border-color: #e03d06; color: #e03d06;
+    background: rgba(224,61,6,0.06);
+    transform: translateY(-2px);
+}
+
+/* Footer */
+.c-foot {
+    padding: 0.85rem 1.65rem 1.1rem;
+    border-top: 1px solid #ebebE7;
+    text-align: center;
+}
+.c-foot p { font-size: 0.65rem; color: #555; line-height: 1.6; font-weight: 500; }
+.c-foot .dev { font-size: 0.67rem; color: #444; margin-top: 1px; font-weight: 500; }
+.c-foot .dev strong { color: #000; font-weight: 700; }
+
+/* ═══════════════════
+   RESPONSIVE
+═══════════════════ */
+@media (max-width: 680px) {
+    .brand-side { display: none; }
+    .scene { justify-content: center; padding: 1rem; }
+    .card-wrap { width: min(330px, 100%); }
+    body { overflow-y: auto; align-items: flex-start; padding-top: 1.5rem; }
+}
+@media (max-width: 380px) {
+    .c-head { padding: 1.2rem 1.35rem 1.1rem; }
+    .c-body { padding: 1.2rem 1.35rem 1.3rem; }
+    .c-foot { padding: 0.75rem 1.35rem 0.95rem; }
+    .card { border-radius: 22px; }
+}
+
+    </style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="scene">
+
+    <!-- LEFT brand -->
+    <div class="brand-side">
+
+        <!-- Logo + University name -->
+        <div class="brand-logo-row">
+            <div class="nu-logo-wrap">
+                <img class="nu-logo-img"
+                     src="{{ url_for('static', filename='nu.png') }}"
+                     alt="NU Logo"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="nu-logo-fallback" style="display:none;width:72px;height:72px;border-radius:50%;background:#c1310a;align-items:center;justify-content:center;font-size:1.6rem;color:#fff;font-family:'Sora',sans-serif;font-weight:800;position:relative;z-index:2;">NU</div>
+            </div>
+           <!--  <div class="brand-logo-text">
+                <div class="brand-logo-title">National <span class="lo">University</span></div>
+                <div class="brand-logo-sub">Archive Explorer &nbsp;·&nbsp; ICT Division</div>
+            </div> -->
+        </div>
+
+        <div class="eyebrow">National University</div>
+        <div class="brand-h">
+            Archive<br><span class="r">Explorer</span>
+            <span class="sm">Tabulation &nbsp;·&nbsp; ICT Division</span>
+        </div>
+        <p class="brand-p">Centralised access to examination sheets and student records spanning over a decade of academic history.</p>
+        <div class="stats">
+            <div>
+                <div class="s-num">4.4<em>M</em></div>
+                <div class="s-lbl">Records</div>
+            </div>
+            <div>
+                <div class="s-num">14<em>+</em></div>
+                <div class="s-lbl">Years</div>
+            </div>
+            <div>
+                <div class="s-num">99<em>%</em></div>
+                <div class="s-lbl">Uptime</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT card -->
+    <div class="card-wrap">
+        <div class="card">
+
+            <div class="c-head">
+                <div class="c-logo">
+                    <div class="c-logo-icon">🏛</div>
+                    <div>
+                        <div class="c-logo-name">National University</div>
+                        <div class="c-logo-sub">Tabulation Archive System</div>
+                    </div>
+                </div>
+                <div class="c-title">Welcome back.</div>
+                <div class="c-subtitle">Sign in to access your archive</div>
+            </div>
+
+            <div class="c-body">
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}{% for c, m in messages %}
+                    <div class="nu-alert"><i class="bi bi-exclamation-circle-fill"></i> {{ m }}</div>
+                    {% endfor %}{% endif %}
+                {% endwith %}
+
+                <form method="POST">
+
+                    <div class="field">
+                        <label class="f-label">Username or ID</label>
+                        <div class="f-wrap">
+                            <i class="bi bi-person f-icon"></i>
+                            <input type="text" name="username" class="f-input"
+                                   placeholder="Enter your username"
+                                   autocomplete="username" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="f-label">Password</label>
+                        <div class="f-wrap">
+                            <i class="bi bi-lock f-icon"></i>
+                            <input type="password" name="password" id="passField" class="f-input"
+                                   placeholder="Enter your password"
+                                   autocomplete="current-password" required>
+                            <button type="button" class="toggle-btn" onclick="togglePass(this)" tabindex="-1">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="forgot-row">
+                        <a href="#" class="forgot-link" onclick="forgot(event)">Forgot credentials?</a>
+                    </div>
+
+                    <div class="forgot-msg" id="forgotMsg">
+                        <i class="bi bi-info-circle"></i>
+                        <span>Contact the <strong>ICT Department</strong> for assistance.</span>
+                    </div>
+
+                    <button type="submit" class="btn-go">Sign In &nbsp;→</button>
+
+                </form>
+
+                <div class="sep">or continue with</div>
+
+                <div class="social">
+                    <button class="soc-btn" type="button" title="Google"><i class="bi bi-google"></i></button>
+                    <button class="soc-btn" type="button" title="Microsoft"><i class="bi bi-microsoft"></i></button>
+                    <button class="soc-btn" type="button" title="Apple"><i class="bi bi-apple"></i></button>
+                </div>
+
+            </div>
+
+            <div class="c-foot">
+                <p>&copy; 2026 National University · ICT Department</p>
+                <p class="dev">Designed &amp; Developed by <strong>Mridul Roy</strong> · AP, ICT, NU</p>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* ═════════════════════════════════════════════════════════
+   BACKGROUND — white canvas with animated red powder clouds
+═════════════════════════════════════════════════════════ */
+(function () {
+    const cvs = document.getElementById('bg-canvas');
+    const ctx  = cvs.getContext('2d');
+    let W, H;
+
+    /* ── Burst sources (relative coords) ── */
+    const BURSTS = [
+        { bx: 0.75, by: 0.14, hue: 8,  size: 1.4  },  /* big red-orange top-right */
+        { bx: 0.88, by: 0.04, hue: 18, size: 0.9  },  /* warm orange accent */
+        { bx: 0.60, by: 0.32, hue: 4,  size: 0.75 },  /* deep red scatter */
+        { bx: 0.06, by: 0.88, hue: 10, size: 0.5  },  /* bottom-left echo */
+        { bx: 0.92, by: 0.55, hue: 6,  size: 0.45 },  /* right mid drift */
+    ];
+
+    /* ── Puff cloud blobs ── */
+    const PUFFS = [];
+
+    function mkPuff(b) {
+        const a  = Math.random() * Math.PI * 2;
+        const d  = Math.random() ** 0.5 * 0.46 * Math.min(W, H);
+        const r  = (28 + Math.random() * 95) * b.size * (W / 1000);
+        return {
+            x: b.bx * W + Math.cos(a) * d,
+            y: b.by * H + Math.sin(a) * d,
+            r,
+            hue:   b.hue + (Math.random() - 0.5) * 18,
+            sat:   80 + Math.random() * 18,
+            lum:   42 + Math.random() * 22,
+            alpha: 0.13 + Math.random() * 0.19,
+            vx:  (Math.random() - 0.5) * 0.18,
+            vy:  -(0.025 + Math.random() * 0.13),
+            vr:  (Math.random() - 0.5) * 0.06,
+            life: 0, max: 260 + Math.random() * 200,
+            b,
+        };
+    }
+
+    /* ── Tiny motes ── */
+    const MOTES = [];
+
+    function mkMote() {
+        const b = BURSTS[Math.floor(Math.random() * BURSTS.length)];
+        const a = Math.random() * Math.PI * 2;
+        const d = Math.random() ** 0.38 * 0.5 * Math.min(W, H);
+        return {
+            x: b.bx * W + Math.cos(a) * d,
+            y: b.by * H + Math.sin(a) * d,
+            r:  0.9 + Math.random() * 3.2,
+            hue: b.hue + (Math.random() - 0.5) * 24,
+            alpha: 0.18 + Math.random() * 0.28,
+            vx: (Math.random() - 0.5) * 0.75,
+            vy: -(0.08 + Math.random() * 0.48),
+            life: 0, max: 90 + Math.random() * 180,
+        };
+    }
+
+    function init() {
+        PUFFS.length = 0; MOTES.length = 0;
+        const pp = Math.ceil(240 / BURSTS.length);
+        BURSTS.forEach(b => {
+            for (let i = 0; i < pp; i++) {
+                const p = mkPuff(b);
+                p.life = Math.random() * p.max;
+                PUFFS.push(p);
+            }
+        });
+        for (let i = 0; i < 180; i++) {
+            const m = mkMote();
+            m.life = Math.random() * m.max;
+            MOTES.push(m);
+        }
+    }
+
+    function resize() {
+        W = cvs.width  = window.innerWidth;
+        H = cvs.height = window.innerHeight;
+        init();
+    }
+
+    function drawBg() {
+        /* Warm white radial — noticeably warmer near burst origin */
+        const g = ctx.createRadialGradient(W * 0.76, H * 0.10, 0, W * 0.5, H * 0.5, Math.hypot(W, H) * 0.72);
+        g.addColorStop(0,   '#ffeee6');
+        g.addColorStop(0.3, '#fdf5f0');
+        g.addColorStop(0.7, '#f8f7f4');
+        g.addColorStop(1,   '#f2f1ee');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, W, H);
+    }
+
+    function drawPuffs() {
+        PUFFS.forEach((p, i) => {
+            const prog  = p.life / p.max;
+            const fade  = Math.sin(prog * Math.PI);
+            const alpha = p.alpha * fade;
+            const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+            g.addColorStop(0,    `hsla(${p.hue},${p.sat}%,${p.lum}%,${alpha})`);
+            g.addColorStop(0.45, `hsla(${p.hue},${p.sat}%,${p.lum}%,${alpha * 0.55})`);
+            g.addColorStop(0.78, `hsla(${p.hue},${p.sat}%,${p.lum}%,${alpha * 0.18})`);
+            g.addColorStop(1,    `hsla(${p.hue},${p.sat}%,${p.lum}%,0)`);
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = g;
+            ctx.fill();
+            p.x += p.vx; p.y += p.vy; p.r += p.vr; p.life++;
+            if (p.life >= p.max) { PUFFS[i] = mkPuff(p.b); PUFFS[i].life = 0; }
+        });
+    }
+
+    function drawMotes() {
+        MOTES.forEach((m, i) => {
+            const fade  = Math.sin((m.life / m.max) * Math.PI);
+            const alpha = m.alpha * fade;
+            /* inner bright core + outer soft halo */
+            const g = ctx.createRadialGradient(m.x, m.y, 0, m.x, m.y, m.r * 2.5);
+            g.addColorStop(0,   `hsla(${m.hue},90%,52%,${alpha})`);
+            g.addColorStop(0.5, `hsla(${m.hue},85%,55%,${alpha * 0.5})`);
+            g.addColorStop(1,   `hsla(${m.hue},85%,55%,0)`);
+            ctx.beginPath();
+            ctx.arc(m.x, m.y, m.r * 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = g;
+            ctx.fill();
+            m.x += m.vx; m.y += m.vy; m.life++;
+            if (m.life >= m.max) { MOTES[i] = mkMote(); }
+        });
+    }
+
+    function loop() {
+        drawBg();
+        drawPuffs();
+        drawMotes();
+        requestAnimationFrame(loop);
+    }
+
+    resize();
+    loop();
+    window.addEventListener('resize', resize);
+})();
+
+function togglePass(btn) {
+    const f = document.getElementById('passField');
+    const i = btn.querySelector('i');
+    f.type = f.type === 'password' ? 'text' : 'password';
+    i.className = f.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+}
+
+function forgot(e) {
+    e.preventDefault();
+    document.getElementById('forgotMsg').classList.toggle('show');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NU Tabulation Explorer - Web</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #F0F2F5; height: 100vh; margin: 0; overflow: hidden; display: flex; flex-direction: column; }
+        .app-header { background: #1A237E; color: white; padding: 10px 25px; height: 60px; flex-shrink: 0; z-index: 1000; }
+        .main-container { display: flex; flex-grow: 1; height: calc(100vh - 60px); width: 100%; }
+        
+        /* Sidebar Styling */
+        .left-panel { 
+            width: 380px; min-width: 380px; background: white; 
+            border-right: 1px solid #E0E0E0; padding: 20px; 
+            display: flex; flex-direction: column; 
+        }
+        .results-box { max-height: 180px; overflow-y: auto; border: 1px solid #dee2e6; margin-bottom: 15px; }
+        .details-wrapper { flex-grow: 1; overflow-y: auto; }
+        .detail-card { 
+            background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; 
+            padding: 12px; font-family: 'Consolas', monospace; font-size: 11px;
+        }
+        
+        /* Centered Viewer */
+        .right-panel { flex-grow: 1; background: #333; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .toolbar { background: rgba(255,255,255,0.9); padding: 8px 20px; border-bottom: 1px solid #ddd; z-index: 100; }
+        
+        #viewport {
+            flex-grow: 1; position: relative; overflow: hidden; cursor: grab;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #viewport:active { cursor: grabbing; }
+        #tabulation-img {
+            transition: transform 0.05s ease-out; transform-origin: center center;
+            max-width: 90%; max-height: 90%; box-shadow: 0 0 30px rgba(0,0,0,0.6);
+            user-select: none; -webkit-user-drag: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-header d-flex justify-content-between align-items-center">
+    <h5 class="m-0">📊 NU Tabulation Data Explorer</h5>
+    <span class="small">National University, Bangladesh</span>
+</div>
+
+<div class="main-container">
+    <div class="left-panel">
+        <form method="POST" class="mb-3">
+            <div class="row g-2 mb-2">
+                <div class="col"><input type="text" name="reg_no" placeholder="Reg No" class="form-control form-control-sm" value="{{ request.form.get('reg_no', '') }}"></div>
+                <div class="col"><input type="text" name="roll" placeholder="Roll No" class="form-control form-control-sm" value="{{ request.form.get('roll', '') }}"></div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm w-100">🔍 SEARCH</button>
+        </form>
+
+        <h6 class="small fw-bold text-muted text-uppercase">Records Found ({{ results|length }})</h6>
+        <div class="results-box">
+            {% for res in results %}
+            <form method="POST">
+                <input type="hidden" name="reg_no" value="{{ request.form.get('reg_no','') }}">
+                <input type="hidden" name="roll" value="{{ request.form.get('roll','') }}">
+                <input type="hidden" name="target_master_id" value="{{ res.MASTER_ID }}">
+                <button type="submit" class="btn btn-light btn-sm w-100 text-start border-bottom rounded-0 py-2">
+                    <span class="fw-bold d-block">{{ res.EXM_YR }} - {{ res.EXM_NAME[:25] }}...</span>
+                    <span class="text-muted" style="font-size: 10px;">{{ res.COLLEGE[:35] }}</span>
+                </button>
+            </form>
+            {% endfor %}
+        </div>
+
+        <h6 class="small fw-bold text-muted text-uppercase">Student Details</h6>
+        <div class="details-wrapper">
+            <div class="detail-card">
+                {% if student %}
+                    {% for key, val in student.items() %}
+                        <div class="text-primary fw-bold" style="font-size: 10px;">{{ key }}</div>
+                        <div class="mb-2 text-dark">{{ val }}</div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted small">No record selected.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="toolbar d-flex justify-content-between">
+            <span class="small text-muted align-self-center">Wheel: Zoom | Drag: Pan</span>
+            <div>
+                <button class="btn btn-sm btn-outline-primary" onclick="resetZoom()">Reset Fit</button>
+                <button class="btn btn-sm btn-outline-success mx-1" onclick="window.print()">Print</button>
+                <a href="/" class="btn btn-sm btn-outline-danger">Clear</a>
+            </div>
+        </div>
+        
+        <div id="viewport">
+            {% if image %}
+                <img id="tabulation-img" src="data:image/jpeg;base64,{{ image }}">
+            {% else %}
+                <div class="text-white opacity-25 text-center"><h5>Search to Preview Image</h5></div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    const img = document.getElementById('tabulation-img');
+    const viewport = document.getElementById('viewport');
+    
+    if (img) {
+        let scale = 1, pointX = 0, pointY = 0, start = { x: 0, y: 0 }, isPanning = false;
+
+        function update() { img.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`; }
+
+        viewport.onmousedown = (e) => { e.preventDefault(); isPanning = true; start = { x: e.clientX - pointX, y: e.clientY - pointY }; };
+        window.onmouseup = () => isPanning = false;
+        viewport.onmousemove = (e) => { if (!isPanning) return; pointX = e.clientX - start.x; pointY = e.clientY - start.y; update(); };
+
+        viewport.onwheel = (e) => {
+            e.preventDefault();
+            const xs = (e.clientX - pointX) / scale, ys = (e.clientY - pointY) / scale;
+            (e.deltaY < 0) ? (scale *= 1.2) : (scale /= 1.2);
+            scale = Math.min(Math.max(0.1, scale), 10);
+            pointX = e.clientX - xs * scale;
+            pointY = e.clientY - ys * scale;
+            update();
+        };
+
+        function resetZoom() { scale = 1; pointX = 0; pointY = 0; update(); }
+    }
+</script>
+</body>
+</html>

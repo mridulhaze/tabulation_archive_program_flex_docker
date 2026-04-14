@@ -1,0 +1,9 @@
+# Stop and remove the existing container
+docker stop nu-tabulation-app
+docker rm nu-tabulation-app
+
+# Re-run with correct port mapping (host:container)
+docker run -d --restart unless-stopped --name nu-tabulation-app -p 8000:5000 nu-tabulation
+
+CHECK ON : 
+http://localhost:8000
